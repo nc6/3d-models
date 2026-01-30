@@ -1,24 +1,25 @@
-module hexMesh(
+module hexMesh2d(
     cellSize = 2,
     meshWidth = 0.1,
-    height = 2,
     size = 10
 ) {
     xOffset = 3/2 * cellSize;
     yOffset = sqrt(3) * cellSize;
+    fillet = meshWidth / 3;
     
-    module oneHex() {
-        eps = 0.01;
+    module hexRing2d() {
+        offset(r = fillet)
+        offset(delta = -fillet)
         difference() {
             circle(cellSize, $fn = 6);
-            circle(cellSize - meshWidth - eps, $fn = 6);
+            circle(cellSize - meshWidth, $fn = 6);
         }
     }
     
     module hexLine() {
         for(i = [0 : 1: size]) {
             translate([0, yOffset * i, 0])
-            oneHex();
+            hexRing2d();
         }   
     }
     
@@ -29,7 +30,6 @@ module hexMesh(
         }
     }
     
-    linear_extrude(height)
     union() {
         halfGrid();
         translate([xOffset, yOffset / 2, 0]) halfGrid();
@@ -42,8 +42,8 @@ module basePlate(
     cupBuffer=0.5,
     wallThickness=1.5,
     centreSpacing=50,
-    Base_Height=8,
-    Cup_Recess=5,
+    Base_Height=10,
+    Cup_Recess=8,
 ) {
 
     difference() {
@@ -75,10 +75,11 @@ module cup(
     wallThickness = 1.5,
     baseThickness = 2,
 ) {
+    linear_extrude(baseThickness) 
     intersection() {
-        linear_extrude(baseThickness) circle(cupRadius);
-        translate([-cupRadius, -cupRadius, -1])
-        hexMesh(cellSize = cupRadius / 8, height = baseThickness + 2, meshWidth = 0.5);
+        circle(cupRadius - (wallThickness / 2));
+        translate([-cupRadius, -cupRadius])
+        hexMesh2d(cellSize = cupRadius / 6, meshWidth = 0.8);
     }   
     difference() {
         linear_extrude(cupHeight, twist=360) circle(cupRadius, $fn=25);
